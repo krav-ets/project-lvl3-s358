@@ -12,3 +12,7 @@ $ npm install page-loader-kravets
 ```bash
 $ page-loader-kravets --output <directory> <url>
 ```
+
+## Asciinema
+
+[Checkpoint #1](https://asciinema.org/a/0rTTG9XQv2gZwbK0YzQCPxNgc)
