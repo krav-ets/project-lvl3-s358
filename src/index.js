@@ -5,12 +5,7 @@ import _ from 'lodash';
 
 const genFileName = (url) => {
   const { host, pathname } = new URL(url);
-  const fileName = `${host}${pathname}`
-    .split('')
-    .reduce((acc, char) => {
-      const c = /[A-Za-z0-9]/.test(char) ? char : '-';
-      return acc + c;
-    }, '');
+  const fileName = `${host}${pathname}`.replace(/\W/g, '-');
   const trimFileName = _.trim(fileName, '-');
   const result = `${trimFileName}.html`;
   return result;
