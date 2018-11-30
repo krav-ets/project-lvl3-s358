@@ -27,7 +27,10 @@
   "homepage": "https://github.com/krav-ets/project-lvl3-s358#readme",
   "jest": {
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["<rootDir>/__tests__/__fixtures__", "<rootDir>/node_modules/"]
+    "testPathIgnorePatterns": [
+      "<rootDir>/__tests__/__fixtures__",
+      "<rootDir>/node_modules/"
+    ]
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
@@ -38,7 +41,6 @@
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
-    "debug": "^4.0.1",
     "eslint": "^5.8.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-babel": "^5.2.1",
@@ -53,6 +55,7 @@
     "axios": "^0.18.0",
     "cheerio": "^1.0.0-rc.2",
     "commander": "^2.19.0",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "debug": "^4.1.0"
   }
 }

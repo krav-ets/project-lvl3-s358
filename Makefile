@@ -4,6 +4,9 @@ run-hexlet:
 run-bifit:
 	npx babel-node -- src/bin/page-loader.js -o /var/tmp http://www.bifit.com/ru/
 
+run-debug:
+	DEBUG=page-loader	npx babel-node -- src/bin/page-loader.js -o /var/tmp http://www.bifit.com/ru/
+
 run-err:
 	npx babel-node -- src/bin/page-loader.js -o /var/tmp https://hexlet.io/cour
 
@@ -12,7 +15,7 @@ build:
 	npm run build
 
 test:
-	npm test
+	DEBUG=page-loader	npm test
 
 watch:
 	npm test -- --watch

@@ -4,7 +4,9 @@ import { promises as fsPromises, createWriteStream } from 'fs';
 import _ from 'lodash';
 import cheerio from 'cheerio';
 import url from 'url';
+import debug from 'debug';
 
+const log = debug('page-loader');
 
 const genLocalResName = (uri) => {
   const link = path.parse(uri);
@@ -66,7 +68,8 @@ const saveLink = (link, pathToResources, addr) => {
     url: uri,
     responseType: 'stream',
   })
-    .then(response => response.data.pipe(createWriteStream(fullPath)));
+    .then(response => response.data.pipe(createWriteStream(fullPath)))
+    .then(() => log(`Link ${uri} was downloaded`));
 };
 
 const saveAllLinks = (links, pathToResources, addr) => Promise
@@ -84,12 +87,11 @@ const pageLoader = (address, pathToFolder) => {
       pageLinks.push(...getLinks($));
       replaceLinks($, folderForResources);
       const newHtml = $.html();
-      // console.log(pageLinks);
       return fsPromises.writeFile(fullPathToHtml, newHtml, 'utf8');
     })
     .then(() => fsPromises.mkdir(fullPathToFolder))
-    .then(() => saveAllLinks(pageLinks, fullPathToFolder, address))
-    .catch(err => console.log(err));
+    .then(() => log(`Directory ${fullPathToFolder} was created`))
+    .then(() => saveAllLinks(pageLinks, fullPathToFolder, address));
 };
 
 export default pageLoader;
