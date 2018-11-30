@@ -15,5 +15,5 @@ $ page-loader-kravets --output <directory> <url>
 
 ## Asciinema
 
-[Checkpoint #1](https://asciinema.org/a/0rTTG9XQv2gZwbK0YzQCPxNgc)
+[Checkpoint #1](https://asciinema.org/a/0rTTG9XQv2gZwbK0YzQCPxNgc)   
 [Checkpoint #2 and #3](https://asciinema.org/a/zod11d0jbRcaitrAAi0lsUZ1V)
