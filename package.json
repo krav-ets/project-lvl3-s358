@@ -26,7 +26,8 @@
   },
   "homepage": "https://github.com/krav-ets/project-lvl3-s358#readme",
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": ["<rootDir>/__tests__/__fixtures__", "<rootDir>/node_modules/"]
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",

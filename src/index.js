@@ -1,22 +1,95 @@
 import axios from 'axios';
 import path from 'path';
-import { promises as fsPromises } from 'fs';
+import { promises as fsPromises, createWriteStream } from 'fs';
 import _ from 'lodash';
+import cheerio from 'cheerio';
+import url from 'url';
 
-const genFileName = (url) => {
-  const { host, pathname } = new URL(url);
-  const fileName = `${host}${pathname}`.replace(/\W/g, '-');
+
+const genLocalResName = (uri) => {
+  const link = path.parse(uri);
+  const fileName = path.join(link.dir, link.name).replace(/\W/g, '-');
   const trimFileName = _.trim(fileName, '-');
-  const result = `${trimFileName}.html`;
-  return result;
+  const fullName = `${trimFileName}${link.ext}`;
+  return fullName;
 };
 
+const genName = (uri, extension) => {
+  const { host, pathname } = url.parse(uri);
+
+  if (!host) {
+    return genLocalResName(pathname);
+  }
+
+  const fileName = `${host}${pathname}`.replace(/\W/g, '-');
+  const trimFileName = _.trim(fileName, '-');
+  const fullName = `${trimFileName}${extension}`;
+  return fullName;
+};
+
+const resources = {
+  link: 'href',
+  script: 'src',
+  img: 'src',
+};
+
+const isLocal = (link) => {
+  const { host } = url.parse(link);
+  return !host;
+};
+
+const getLinks = ($) => {
+  const allLinks = Object.keys(resources).reduce((acc, tag) => {
+    const links = $(tag).map((i, el) => $(el).attr(resources[tag])).get();
+    return [...acc, ...links];
+  }, []);
+  return allLinks.filter(l => isLocal(l));
+};
+
+const replaceLinks = ($, folderName) => Object.keys(resources)
+  .forEach((tag) => {
+    const new$ = $(tag).each((i, el) => {
+      const link = $(el).attr(resources[tag]);
+      const editLink = genName(link);
+      const newLink = path.join(folderName, editLink);
+      $(el).attr(resources[tag], newLink);
+    });
+    return new$;
+  });
+
+const saveLink = (link, pathToResources, addr) => {
+  const fileName = genName(link);
+  const fullPath = path.join(pathToResources, fileName);
+  const uri = url.resolve(addr, link);
+  return axios({
+    method: 'get',
+    url: uri,
+    responseType: 'stream',
+  })
+    .then(response => response.data.pipe(createWriteStream(fullPath)));
+};
+
+const saveAllLinks = (links, pathToResources, addr) => Promise
+  .all(links.map(link => saveLink(link, pathToResources, addr)));
 
 const pageLoader = (address, pathToFolder) => {
-  const fileName = genFileName(address);
-  const fullPathToFile = path.join(pathToFolder, fileName);
+  const htmlFileName = genName(address, '.html');
+  const folderForResources = genName(address, '_files');
+  const fullPathToFolder = path.join(pathToFolder, folderForResources);
+  const pageLinks = [];
+  const fullPathToHtml = path.join(pathToFolder, htmlFileName);
   return axios.get(address)
-    .then(response => fsPromises.writeFile(fullPathToFile, response.data, 'utf8'));
+    .then((response) => {
+      const $ = cheerio.load(response.data);
+      pageLinks.push(...getLinks($));
+      replaceLinks($, folderForResources);
+      const newHtml = $.html();
+      // console.log(pageLinks);
+      return fsPromises.writeFile(fullPathToHtml, newHtml, 'utf8');
+    })
+    .then(() => fsPromises.mkdir(fullPathToFolder))
+    .then(() => saveAllLinks(pageLinks, fullPathToFolder, address))
+    .catch(err => console.log(err));
 };
 
 export default pageLoader;

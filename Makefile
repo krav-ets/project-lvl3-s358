@@ -1,8 +1,8 @@
 run-hexlet:
 	npx babel-node -- src/bin/page-loader.js -o /var/tmp https://hexlet.io/courses
 
-run-ozon:
-	npx babel-node -- src/bin/page-loader.js -o /var/tmp https://www.ozON.ru/context/detail/id/5322055/
+run-bifit:
+	npx babel-node -- src/bin/page-loader.js -o /var/tmp http://www.bifit.com/ru/
 
 run-err:
 	npx babel-node -- src/bin/page-loader.js -o /var/tmp https://hexlet.io/cour
