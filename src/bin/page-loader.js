@@ -1,12 +1,8 @@
 #!/usr/bin/env node
 
 import program from 'commander';
-import debug from 'debug';
 import { version } from '../../package.json';
 import pageLoader from '..';
-import errorHandler from '../errorHandler';
-
-const log = debug('page-loader');
 
 program
   .version(version)
@@ -20,8 +16,7 @@ program
         process.exit(0);
       })
       .catch((err) => {
-        log(`ERROR ${err}`);
-        console.error(errorHandler(err));
+        console.error(err.message);
         process.exitCode = 1;
       });
   })

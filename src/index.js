@@ -66,7 +66,12 @@ const saveLink = (uri, fullPath) => axios({
   responseType: 'stream',
 })
   .then(response => response.data.pipe(createWriteStream(fullPath)))
-  .then(() => log(`'${uri}' was downloaded to '${fullPath}'`));
+  .then(() => log(`'${uri}' was downloaded to '${fullPath}'`))
+  .catch((error) => {
+    const msg = error.message;
+    const newError = { ...error, message: `${msg} ${uri}` };
+    throw newError;
+  });
 
 const makeListr = (links, pathToResources, address) => {
   const tasks = links.reduce((acc, link) => {
@@ -81,9 +86,6 @@ const makeListr = (links, pathToResources, address) => {
   }, []);
   return new Listr(tasks, { concurrent: true });
 };
-
-// const saveAllLinks = (links, pathToResources, address) => Promise
-// .all(links.map(link => saveLink(link, pathToResources, address)));
 
 const pageLoader = (address, pathToFolder) => {
   const htmlFileName = genName(address, '.html');
@@ -100,6 +102,10 @@ const pageLoader = (address, pathToFolder) => {
       replaceLinks($, folderForResources);
       const newHtml = $.html();
       return fsPromises.writeFile(fullPathToHtml, newHtml, 'utf8');
+    }, (error) => {
+      const msg = error.message;
+      const newError = { ...error, message: `${msg} ${address}` };
+      throw newError;
     })
     .then(() => log(`'${htmlFileName}' saved to directory ${pathToFolder}`))
     .then(() => fsPromises.mkdir(fullPathToFolder))

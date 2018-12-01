@@ -44,12 +44,20 @@ it('#downloading resources', async () => {
 
 it('#network error, status code 414', async () => {
   const dir = await fsPromises.mkdtemp(tmpDir);
-
-  await expect(pageLoader('https://hexlet.io/long_uri', dir)).rejects.toMatchSnapshot();
+  expect.assertions(1);
+  try {
+    await pageLoader('https://hexlet.io/long_uri', dir);
+  } catch (err) {
+    expect(err.message).toMatchSnapshot();
+  }
 });
 
 it('#fs error, code ENOENT', async () => {
   // const dir = await fsPromises.mkdtemp(tmpDir);
-
-  await expect(pageLoader(pageUrl, tmpDir)).rejects.toMatchSnapshot();
+  expect.assertions(1);
+  try {
+    await pageLoader(pageUrl, tmpDir);
+  } catch (err) {
+    expect(err.message).toMatchSnapshot();
+  }
 });
