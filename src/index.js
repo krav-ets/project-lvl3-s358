@@ -5,6 +5,7 @@ import _ from 'lodash';
 import cheerio from 'cheerio';
 import url from 'url';
 import debug from 'debug';
+import Listr from 'listr';
 
 const log = debug('page-loader');
 
@@ -59,21 +60,30 @@ const replaceLinks = ($, folderName) => Object.keys(resources)
     return new$;
   });
 
-const saveLink = (link, pathToResources, addr) => {
-  const fileName = genName(link);
-  const fullPath = path.join(pathToResources, fileName);
-  const uri = url.resolve(addr, link);
-  return axios({
-    method: 'get',
-    url: uri,
-    responseType: 'stream',
-  })
-    .then(response => response.data.pipe(createWriteStream(fullPath)))
-    .then(() => log(`Link ${uri} was downloaded`));
+const saveLink = (uri, fullPath) => axios({
+  method: 'get',
+  url: uri,
+  responseType: 'stream',
+})
+  .then(response => response.data.pipe(createWriteStream(fullPath)))
+  .then(() => log(`'${uri}' was downloaded to '${fullPath}'`));
+
+const makeListr = (links, pathToResources, address) => {
+  const tasks = links.reduce((acc, link) => {
+    const fileName = genName(link);
+    const fullPath = path.join(pathToResources, fileName);
+    const uri = url.resolve(address, link);
+    const newTask = {
+      title: `${uri}`,
+      task: () => saveLink(uri, fullPath),
+    };
+    return [...acc, newTask];
+  }, []);
+  return new Listr(tasks, { concurrent: true });
 };
 
-const saveAllLinks = (links, pathToResources, addr) => Promise
-  .all(links.map(link => saveLink(link, pathToResources, addr)));
+// const saveAllLinks = (links, pathToResources, address) => Promise
+// .all(links.map(link => saveLink(link, pathToResources, address)));
 
 const pageLoader = (address, pathToFolder) => {
   const htmlFileName = genName(address, '.html');
@@ -83,15 +93,23 @@ const pageLoader = (address, pathToFolder) => {
   const fullPathToHtml = path.join(pathToFolder, htmlFileName);
   return axios.get(address)
     .then((response) => {
+      log(`'${address}' page is being downloaded`);
       const $ = cheerio.load(response.data);
       pageLinks.push(...getLinks($));
+      log(`Сreated an array of links to local page resources: \n${pageLinks}`);
       replaceLinks($, folderForResources);
       const newHtml = $.html();
       return fsPromises.writeFile(fullPathToHtml, newHtml, 'utf8');
     })
+    .then(() => log(`'${htmlFileName}' saved to directory ${pathToFolder}`))
     .then(() => fsPromises.mkdir(fullPathToFolder))
     .then(() => log(`Directory ${fullPathToFolder} was created`))
-    .then(() => saveAllLinks(pageLinks, fullPathToFolder, address));
+    .then(() => makeListr(pageLinks, fullPathToFolder, address))
+    .then(list => list.run())
+    .then(() => {
+      log('Page loaded');
+      return `Page was downloaded as '${htmlFileName}'`;
+    });
 };
 
 export default pageLoader;

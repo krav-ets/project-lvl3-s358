@@ -1,5 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#fs error, code ENOENT 1`] = `"Error: ENOENT: no such file or directory, open '/tmp/hexlet-tmp-/hexlet-io-courses.html'"`;
+exports[`#fs error, code ENOENT 1`] = `[Error: ENOENT: no such file or directory, open '/tmp/hexlet-tmp-/hexlet-io-courses.html']`;
 
-exports[`#network error, status code 414 1`] = `"Error: Request failed with status code 414"`;
+exports[`#network error, status code 414 1`] = `[Error: Request failed with status code 414]`;
