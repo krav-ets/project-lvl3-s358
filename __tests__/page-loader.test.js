@@ -13,7 +13,7 @@ const pathname = '/courses';
 const pageUrl = `${host}${pathname}`;
 const tmpDir = path.join(os.tmpdir(), 'hexlet-tmp-');
 
-beforeAll(async () => {
+beforeEach(async () => {
   const originalPage = await fsPromises.readFile(path.join(__dirname, '__fixtures__/page.html'), 'utf8');
 
   nock(host).get(pathname).reply(200, originalPage);
@@ -21,6 +21,7 @@ beforeAll(async () => {
   nock(host).get('/files/style.css').replyWithFile(200, path.join(__dirname, '__fixtures__/files/style.css'));
   nock(host).get('/files/girl1.png').replyWithFile(200, path.join(__dirname, '__fixtures__/files/girl1.png'));
   nock(host).get('/files/ismobile.js').replyWithFile(200, path.join(__dirname, '__fixtures__/files/ismobile.js'));
+  nock(host).get('/long_uri').reply(414, 'URI Too Long');
 });
 
 it('#downloading resources', async () => {
@@ -39,4 +40,21 @@ it('#downloading resources', async () => {
   expect(png.isFile()).toBe(true);
   expect(svg.isFile()).toBe(true);
   expect(css.isFile()).toBe(true);
+});
+
+it('#network error, status code 414', async () => {
+  const dir = await fsPromises.mkdtemp(tmpDir);
+  try {
+    await pageLoader('https://hexlet.io/long_uri', dir);
+  } catch (err) {
+    expect(err.toString()).toMatchSnapshot();
+  }
+});
+
+it('#fs error, code ENOENT', async () => {
+  try {
+    await pageLoader(pageUrl, tmpDir);
+  } catch (err) {
+    expect(err.toString()).toMatchSnapshot();
+  }
 });
