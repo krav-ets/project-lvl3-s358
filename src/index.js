@@ -68,8 +68,7 @@ const saveLink = (uri, fullPath) => axios({
   .then(response => response.data.pipe(createWriteStream(fullPath)))
   .then(() => log(`'${uri}' was downloaded to '${fullPath}'`))
   .catch((error) => {
-    const msg = error.message;
-    const newError = { ...error, message: `${msg} ${uri}` };
+    const newError = { ...error, message: `${error.message} ${uri}` };
     throw newError;
   });
 
@@ -103,8 +102,7 @@ const pageLoader = (address, pathToFolder) => {
       const newHtml = $.html();
       return fsPromises.writeFile(fullPathToHtml, newHtml, 'utf8');
     }, (error) => {
-      const msg = error.message;
-      const newError = { ...error, message: `${msg} ${address}` };
+      const newError = { ...error, message: `${error.message} ${address}` };
       throw newError;
     })
     .then(() => log(`'${htmlFileName}' saved to directory ${pathToFolder}`))

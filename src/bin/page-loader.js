@@ -13,7 +13,6 @@ program
     pageLoader(address, options.output)
       .then((msg) => {
         console.log('\n', msg);
-        process.exit(0);
       })
       .catch((err) => {
         console.error(err.message);
